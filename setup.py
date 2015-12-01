@@ -26,7 +26,7 @@ def read(*names, **kwargs):
 
 setup(
     name='python_sqs_consumer',
-    version='0.0.1',
+    version='0.0.2',
     license='BSD',
     description='An example package. Replace this with a proper project description. Generated with https://github.com/ionelmc/cookiecutter-pylibrary',
     long_description='%s\n%s' % (
