@@ -40,7 +40,7 @@ class TestSQSConsumerPool(unittest.TestCase):
         consumer = SQSConsumerPool(max_threads=1, processor_class=S3Processor, queue_name=self.queue_name)
 
         with patch.object(S3Processor, 'processor_class', create=True) as mock_processor_class:
-            consumer.consume(queue, consumer.processor_class())
+            consumer.consume(queue)
 
         mock_processor_class.assert_has_calls([
             call(),
@@ -53,6 +53,6 @@ class TestSQSConsumerPool(unittest.TestCase):
         consumer = SQSConsumerPool(max_threads=1, processor_class=S3Processor, queue_name=self.queue_name)
 
         with patch.object(S3Processor, 'processor_class', create=True) as mock_processor_class:
-            consumer.consume(queue, consumer.processor_class())
+            consumer.consume(queue)
 
         assert not mock_processor_class.called
