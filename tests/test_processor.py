@@ -7,17 +7,13 @@ from python_sqs_consumer.processor import S3Processor, S3RecordProcessor, SQSMes
 
 class TestProcessor(unittest.TestCase):
     def test_s3_processor(self):
-        mock = MagicMock()
-        mock.body = '{"Records":[{"s3":{"bucket":{"name":"name"},"object":{"key":"key"}}}]}'
+        mock = {"Records": [{"s3": {"bucket": {"name": "name"}, "object": {"key": "key"}}}]}
         processor = S3Processor()
         with patch.object(S3Processor, 'processor_class', create=True) as mock_processor_class:
             processor.process(mock)
 
         mock_processor_class.assert_has_calls([
-            call(),
-            call().process({'s3': {'bucket': {'name': 'name'}, 'object': {'key': 'key'}}})])
-
-        mock.assert_has_calls([call.delete()])
+            call()])
 
     def test_s3_record_processor(self):
         body = {
@@ -37,8 +33,7 @@ class TestProcessor(unittest.TestCase):
             call().process('name', 'key')])
 
     def test_processors(self):
-        mock = MagicMock()
-        mock.body = '{"Records":[{"s3":{"bucket":{"name":"name"},"object":{"key":"key"}}}]}'
+        mock = {"Records": [{"s3": {"bucket": {"name": "name"}, "object": {"key": "key"}}}]}
 
         class Processor(S3Processor):
             def __init__(self):
