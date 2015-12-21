@@ -3,6 +3,7 @@ import time
 import boto3
 import logging
 from multiprocessing import Process
+from python_sqs_consumer.processor import SQSMessagesProcessor
 
 logger = logging.getLogger(__name__)
 
@@ -17,11 +18,19 @@ class SQSConsumerPool(object):
         self.processor_class = processor_class
         self.queue_name = queue_name
 
+        class _SQSMessagesProcessor(SQSMessagesProcessor):
+            def __init__(self):
+                self.processor_class = processor_class
+
+        self.processor_sqs_class = _SQSMessagesProcessor
+
     def run(self):
         while True:
             for index, worker in enumerate(self.workers_pool):
                 if worker is None or not worker.is_alive():
-                    worker = Process(target=self.consume, args=(self.connect(), self.processor_class()))
+                    consume = self.consume
+                    connect = self.connect
+                    worker = Process(target=consume, args=(connect()))
                     worker.start()
                     self.workers_pool[index] = worker
 
@@ -32,16 +41,10 @@ class SQSConsumerPool(object):
         queue = conn_sqs.get_queue_by_name(QueueName=self.queue_name)
         return queue
 
-    def consume(self, queue, processor):
+    def consume(self, queue):
+        processor_sqs = self.processor_sqs_class()
         logger.debug('Consumer waiting for incomming message...')
         if queue is not None:
 
             messages = queue.receive_messages(MaxNumberOfMessages=1, WaitTimeSeconds=10)
-            if not messages:
-                return
-
-            logger.debug('Processing!...{}'.format(messages))
-
-            if not len(messages) == 0:
-                for message in messages:
-                    processor.process(message)
+            processor_sqs.process(messages)
