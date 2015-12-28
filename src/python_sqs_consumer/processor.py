@@ -10,12 +10,9 @@ class S3Processor(Processor):
     def process(self, message):
         processor = self.processor_class()
 
-        body = json.loads(message.body)
-        if 'Records' in body:
-            for m in body['Records']:
+        if 'Records' in message:
+            for m in message['Records']:
                 processor.process(m)
-
-        message.delete()
 
 
 class S3RecordProcessor(object):
